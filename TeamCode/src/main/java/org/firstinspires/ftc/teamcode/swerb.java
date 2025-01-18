@@ -22,8 +22,8 @@ public class swerb extends OpMode {
     DcMotorEx backLeft;
 
     // Servos
-   ServoImplEx frontRightServo;
-   ServoImplEx frontLeftServo;
+    ServoImplEx frontRightServo;
+    ServoImplEx frontLeftServo;
     ServoImplEx backRightServo;
     ServoImplEx backLeftServo;
 
@@ -51,7 +51,6 @@ public class swerb extends OpMode {
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-
         // Initialize motors
         frontRight = hardwareMap.get(DcMotorEx.class, "FR");
         frontLeft = hardwareMap.get(DcMotorEx.class, "FL");
@@ -59,7 +58,6 @@ public class swerb extends OpMode {
         backLeft = hardwareMap.get(DcMotorEx.class, "BL");
 
         // Initialize servos
-
         frontRightServo = hardwareMap.get(ServoImplEx.class, "sFR");
         frontRightServo.setPwmRange(new PwmControl.PwmRange(505, 2495));
         frontLeftServo = hardwareMap.get(ServoImplEx.class, "sFL");
@@ -69,20 +67,35 @@ public class swerb extends OpMode {
         backLeftServo = hardwareMap.get(ServoImplEx.class, "sBL");
         backLeftServo.setPwmRange(new PwmControl.PwmRange(505, 2495));
 
-
         // Initialize encoders
         frontRightEncoder = hardwareMap.get(AnalogInput.class, "eFR");
         frontLeftEncoder = hardwareMap.get(AnalogInput.class, "eFL");
         backRightEncoder = hardwareMap.get(AnalogInput.class, "eBR");
         backLeftEncoder = hardwareMap.get(AnalogInput.class, "eBL");
+
+        // Set initial servo positions
+        frontRightServo.setPosition(calculateServoPosition(frontRightEncoder.getVoltage() / 3.3 * 360, frontRightZero, frontRightReversed));
+        frontLeftServo.setPosition(calculateServoPosition(frontLeftEncoder.getVoltage() / 3.3 * 360, frontLeftZero, frontLeftReversed));
+        backRightServo.setPosition(calculateServoPosition(backRightEncoder.getVoltage() / 3.3 * 360, backRightZero, backRightReversed));
+        backLeftServo.setPosition(calculateServoPosition(backLeftEncoder.getVoltage() / 3.3 * 360, backLeftZero, backLeftReversed));
+
+        double frpos = frontRightEncoder.getVoltage() / 3.3 * 360;
+        double flpos = frontLeftEncoder.getVoltage() / 3.3 * 360;
+        double brpos = backRightEncoder.getVoltage() / 3.3 * 360;
+        double blpos = backLeftEncoder.getVoltage() / 3.3 * 360;
+
+        telemetry.addData("FR pos", frpos);
+        telemetry.addData("FL pos", flpos);
+        telemetry.addData("BR pos", brpos);
+        telemetry.addData("BL pos", blpos);
     }
 
     @Override
     public void loop() {
-        // Read joystick inputs
-        double x = gamepad1.left_stick_x; // Strafe
-        double y = -gamepad1.left_stick_y; // Forward/Backward
-        double rotation = gamepad1.right_stick_x; // Rotation
+        // Read joystick inputs with dead zone
+        double x = Math.abs(gamepad1.left_stick_x) > 0.05 ? gamepad1.left_stick_x : 0;
+        double y = Math.abs(gamepad1.left_stick_y) > 0.05 ? -gamepad1.left_stick_y : 0;
+        double rotation = Math.abs(gamepad1.right_stick_x) > 0.05 ? gamepad1.right_stick_x : 0;
 
         // Calculate vector magnitudes and angles
         double magnitude = Math.hypot(x, y);
@@ -108,11 +121,11 @@ public class swerb extends OpMode {
         backRight.setPower(backRightPower);
         backLeft.setPower(backLeftPower);
 
-        // Set servo positions
+        // Stabilize servo positions
         double frontRightServoPos = calculateServoPosition(frontRightEncoder.getVoltage() / 3.3 * 360, frontRightZero, frontRightReversed);
         double frontLeftServoPos = calculateServoPosition(frontLeftEncoder.getVoltage() / 3.3 * 360, frontLeftZero, frontLeftReversed);
         double backRightServoPos = calculateServoPosition(backRightEncoder.getVoltage() / 3.3 * 360, backRightZero, backRightReversed);
-        double backLeftServoPos = calculateServoPosition(backLeftEncoder.getVoltage() / 3.3 * 360, backLeftZero,backLeftReversed);
+        double backLeftServoPos = calculateServoPosition(backLeftEncoder.getVoltage() / 3.3 * 360, backLeftZero, backLeftReversed);
 
         double frpos = frontRightEncoder.getVoltage() / 3.3 * 360;
         double flpos = frontLeftEncoder.getVoltage() / 3.3 * 360;
@@ -140,8 +153,7 @@ public class swerb extends OpMode {
 
     public double calculateServoPosition(double encoderValue, double zeroPosition, boolean reversed) {
         // Calculate adjusted angle
-        double adjustedAngle = (encoderValue - zeroPosition + MAX_SERVO_ANGLE) % MAX_SERVO_ANGLE;
-
+        double adjustedAngle = Math.round((encoderValue - zeroPosition + MAX_SERVO_ANGLE) % MAX_SERVO_ANGLE);
         double servoPosition = (adjustedAngle / MAX_SERVO_ANGLE) * SERVO_RANGE;
         return reversed ? (1.0 - servoPosition) : servoPosition;
     }
