@@ -18,13 +18,13 @@ public class CRServoTest extends OpMode {
     private PIDController blPID;
 
 
-    public static double fr = 10;
-    public static double fl = 182;
-    public static double bl = 10;
-    public static double br = 279;
+    public static double fr = 162;
+    public static double fl = 230;
+    public static double bl = 200;
+    public static double br = 170;
     public static double flP = 0.025, flI = 0, flD = 0;
-    public static double frP = 10, frI = 0.5, frD = 0.001;
-    public static double blP = 10, blI = 0.5, blD = 0.001;
+    public static double frP = .01, frI = 0, frD = 0;
+    public static double blP = .01, blI = 0, blD = 0;
     public static double brP = .012, brI = 0, brD = 0;
 
 
@@ -35,10 +35,10 @@ public class CRServoTest extends OpMode {
     AnalogInput frEncoder, flEncoder, brEncoder, blEncoder;
 
     // Offsets (can be saved later)
-    double frOffset = 0;
-    double flOffset = 0;
-    double brOffset = 0;
-    double blOffset = 0;
+    double frOffset = 100;
+    double flOffset = 100;
+    double brOffset = 100;
+    double blOffset = 200;
 
 
     @Override

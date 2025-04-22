@@ -22,7 +22,7 @@ public class drive extends OpMode {
     CRServo frServo, flServo, brServo, blServo;
     AnalogInput frEncoder, flEncoder, brEncoder, blEncoder;
 
-    public static double frOffset = 10, flOffset = 4.5, brOffset = 101.5, blOffset = 10;
+    public static double frOffset = -15.5, flOffset = 52.5, brOffset = -7.5, blOffset = 10;
 
     // PID Controllers
     PIDController frPID = new PIDController(0.015, 0, 0);
