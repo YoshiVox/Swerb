@@ -12,33 +12,47 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import java.util.List;
+import com.qualcomm.hardware.lynx.LynxModule;
 
 @Config
 @TeleOp(name = "pod", group = "drive")
 public class pod extends OpMode {
+    public LynxModule CONTROL_HUB, EXPANSION_HUB;
+
+
+    private ElapsedTime elapsedtime;
+    private List<LynxModule> allHubs;
 
     DcMotorEx frMotor;
     CRServo frServo;
     AnalogInput frEncoder;
     double targetAngle;
     double servoPower;
+    double rawServoPos;
     double servoPos;
 
     double power;
 
     double angle;
 
-    public static double frOffset = 73.25;
+    public static double frOffset = 114.387; //19.72
 
     // PID Controllers
     PIDController controller;
-    public static final double P = 0.005, I = 0, D = 0;
+    public static final double P = 0.01, I = 0, D = 0;
 
     BNO055IMU imu;
 
     @Override
     public void init() {
+
+        allHubs = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule hub : allHubs){
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         frMotor = hardwareMap.get(DcMotorEx.class, "fr_motor");
@@ -49,34 +63,46 @@ public class pod extends OpMode {
 
         controller = new PIDController(P, I, D);
 
+
+        elapsedtime = new ElapsedTime();
+        elapsedtime.reset();
     }
 
     @Override
     public void loop() {
-        servoPos = (frEncoder.getVoltage() / 3.3) * 360 - frOffset;
 
-/*
+        for (LynxModule hub : allHubs){
+            hub.clearBulkCache();
+        }
+
+
+        rawServoPos = (frEncoder.getVoltage() / 3.3) * 360;
+        servoPos = rawServoPos - frOffset;
+
+
         double x = gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y;
 
+        if (y==0){
+            y=-y;
+        }
+        angle = Math.toDegrees(Math.atan2(y,x))-90;
 
-        // Compute vector angle and power
-        if(x>.2 || y>.2) {
+        if(x>.2 || y>.2 || x< -.2 || y < -.2) {
             power = Math.pow(Math.sqrt(x * x + y * y), 3);
         }
         else {
             power = 0;
+            angle = 0;
         }
-        angle = Math.toDegrees(Math.atan2(y,x))-90;
-
         if (angle <=90 && angle >= -90) {
             targetAngle = angle;
         }
-        if(angle > 90) {
-            targetAngle = angle - 180;
+        if(angle < -90 && angle >= -270) {
+            targetAngle = angle + 180;
             power = -power;
         }
-*/
+/*
         double x = gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y; // Negative because up is usually -Y
 
@@ -106,14 +132,21 @@ public class pod extends OpMode {
             targetAngle = 180 - angle;
             power = -power;
         }
+
+
+ */
         frMotor.setPower(power);
 
         servoPower = controller.calculate(servoPos, targetAngle);
         frServo.setPower(servoPower);
 
+        telemetry.addData("Run time", getRuntime());
+        telemetry.addData("Loop Times", elapsedtime.milliseconds());
+        elapsedtime.reset();
 
         telemetry.addData("Angle", angle);
         telemetry.addData("Target Angle", targetAngle);
+        telemetry.addData("Raw Servo Position", rawServoPos);
         telemetry.addData("Servo Position", servoPos);
         telemetry.addData("Servo Power", servoPower);
         telemetry.addData("X", x);

@@ -18,7 +18,7 @@ public class CRServoTest extends OpMode {
     private PIDController blPID;
 
 
-    public static double fr = 162;
+    public static double fr = 116;
     public static double fl = 230;
     public static double bl = 200;
     public static double br = 170;
