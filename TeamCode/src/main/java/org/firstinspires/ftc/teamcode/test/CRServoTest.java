@@ -19,12 +19,12 @@ public class CRServoTest extends OpMode {
 
 
     public static double fr = 116;
-    public static double fl = 230;
-    public static double bl = 200;
-    public static double br = 170;
-    public static double flP = 0.025, flI = 0, flD = 0;
+    public static double fl = 205;
+    public static double bl = 184;
+    public static double br = 145;
+    public static double flP = 0.01, flI = 0, flD = 0;
     public static double frP = .01, frI = 0, frD = 0;
-    public static double blP = .01, blI = 0, blD = 0;
+    public static double blP = .015, blI = 0, blD = 0;
     public static double brP = .012, brI = 0, brD = 0;
 
 
@@ -35,10 +35,10 @@ public class CRServoTest extends OpMode {
     AnalogInput frEncoder, flEncoder, brEncoder, blEncoder;
 
     // Offsets (can be saved later)
-    double frOffset = 100;
-    double flOffset = 100;
-    double brOffset = 100;
-    double blOffset = 200;
+    double frOffset = 116;
+    double flOffset = 205;
+    double brOffset = 145;
+    double blOffset = 184;
 
 
     @Override
