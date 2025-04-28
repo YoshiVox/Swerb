@@ -36,16 +36,17 @@ public class newDrive extends OpMode {
     double power;
     double rawAngle;
     double angle;
+    public static double frOffset = 116, flOffset = 205, brOffset = 145, blOffset = 184; // fr 19.72, fl , br, bl
 
-    public static double frOffset = 114.387, flOffset = 202.15, brOffset = 142.99, blOffset = 181.45; // fr 19.72, fl , br, bl
+    //public static double frOffset = 114.387, flOffset = 202.15, brOffset = 142.99, blOffset = 181.45; // fr 19.72, fl , br, bl
 
 
     // PID Controllers
     PIDController frController, flController, brController, blController;
-    public static double flP = 0.015, flI = 0, flD = 0;
-    public static double frP = .01, frI = 0, frD = 0;
-    public static double blP = .01, blI = 0, blD = 0;
-    public static double brP = .012, brI = 0, brD = 0;
+    public static double flP = 0.025, flI = 0, flD = 0;
+    public static double frP = .015, frI = 0, frD = 0;
+    public static double blP = .012, blI = 0, blD = 0;
+    public static double brP = .013, brI = 0, brD = 0;
     BNO055IMU imu;
 
     @Override
@@ -64,7 +65,6 @@ public class newDrive extends OpMode {
         blMotor = hardwareMap.get(DcMotorEx.class, "bl_motor");
         frMotor.setDirection(DcMotorEx.Direction.REVERSE);
         brMotor.setDirection(DcMotorEx.Direction.REVERSE);
-        blMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
 
         frServo = hardwareMap.get(CRServo.class, "fr_servo");
@@ -94,16 +94,16 @@ public class newDrive extends OpMode {
         }
 
 
-        frRawServoPos = (frEncoder.getVoltage() / 3.3) * 360;
+        frRawServoPos = (frEncoder.getVoltage() / 3.3) * 355;
         frServoPos = frRawServoPos - frOffset;
 
-        flRawServoPos = (flEncoder.getVoltage() / 3.3) * 360;
+        flRawServoPos = (flEncoder.getVoltage() / 3.3) * 355;
         flServoPos = flRawServoPos - flOffset;
 
-        brRawServoPos = (brEncoder.getVoltage() / 3.3) * 360;
+        brRawServoPos = (brEncoder.getVoltage() / 3.3) * 355;
         brServoPos = brRawServoPos - brOffset;
 
-        blRawServoPos = (blEncoder.getVoltage() / 3.3) * 360;
+        blRawServoPos = (blEncoder.getVoltage() / 3.3) * 355;
         blServoPos = blRawServoPos - blOffset;
 
         double x = gamepad1.left_stick_x;
@@ -113,7 +113,7 @@ public class newDrive extends OpMode {
             y=-y;
         }
         rawAngle = Math.toDegrees(Math.atan2(y,x));
-        angle = rawAngle - 90;
+        angle = (rawAngle - 90)*((double) 105/90);
 
         if(x>.2 || y>.2 || x< -.2 || y < -.2) {
             power = Math.pow(Math.sqrt(x * x + y * y), 3);
@@ -122,14 +122,14 @@ public class newDrive extends OpMode {
             power = 0;
             angle = 0;
         }
-        if (angle <=90 && angle >= -90) {
+        if (angle <=105 && angle >= -105) {
             frTargetAngle = angle;
             flTargetAngle = angle;
             brTargetAngle = angle;
             blTargetAngle = angle;
         }
-        if(angle < -90 && angle >= -270) {
-            frTargetAngle = angle + 180;
+        if(angle < -105 && angle >= -315) {
+            frTargetAngle = angle + 210;
             flTargetAngle = angle + 180;
             brTargetAngle = angle + 180;
             blTargetAngle = angle + 180;
@@ -154,6 +154,18 @@ public class newDrive extends OpMode {
         telemetry.addData("Run time", getRuntime());
         telemetry.addData("Loop Times", elapsedtime.milliseconds());
         elapsedtime.reset();
+
+        telemetry.addData("fr", flRawServoPos);
+        telemetry.addData("fr2", frServoPos);
+        telemetry.addData("fr target", frTargetAngle);
+
+        telemetry.addData("fl", flRawServoPos);
+        telemetry.addData("fl2", flServoPos);
+        telemetry.addData("br", brRawServoPos);
+        telemetry.addData("br2", brServoPos);
+        telemetry.addData("bl", blRawServoPos);
+        telemetry.addData("bl2", blServoPos);
+
 
         telemetry.addData("raw angle", rawAngle);
         telemetry.addData("Angle", angle);
