@@ -17,7 +17,7 @@ import java.util.List;
 import com.qualcomm.hardware.lynx.LynxModule;
 
 @Config
-@TeleOp(name = "Drive", group = "drive")
+@TeleOp(name = "newDrive", group = "drive")
 public class newDrive extends OpMode {
     public LynxModule CONTROL_HUB, EXPANSION_HUB;
 
